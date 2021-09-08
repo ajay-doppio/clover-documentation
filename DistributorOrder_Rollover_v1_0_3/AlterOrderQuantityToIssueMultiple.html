@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<meta content="utf-8"/>
+    <script src="https://res.cloudinary.com/techiedelight/raw/upload/v1541880278/beautify.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <style>body{
+  padding: 25px;
+}
+.title {
+	color: #5C6AC4;
+}
+.functionTitle {
+	color: #c45c5c;
+}
+h2{
+    color:cornflowerblue;
+}
+h3{
+    color:cornflowerblue;
+}
+pre {
+  position: relative;
+  margin: 0 0 1.625em;
+  white-space: pre;
+  word-wrap: normal;
+  }
+    pre:code {
+      overflow-x: scroll;
+      display: block;
+      padding: 0 1em;
+      background: $accent-color;
+      background-image: linear-gradient(darken($accent-color, 3%) 50%, transparent 50%);
+      background-size: 100% 3em;
+      background-position: 0 1.5em;
+      background-origin: content-box;
+      color: $background;
+      line-height: 1.5;
+      font-size: 1em;
+    }</style>
+<title>AlterOrderQuantityToIssueMultiple</title>
+  </head>
+  <body>
+      <h1 class="functionTitle">AlterOrderQuantityToIssueMultiple</h2>
+      <h2 class="overviewClass">Overview</h2>
+      This fucntion uses all the data fetched from the previous API(OIS100MI_LstLine, MMS200MI_Get, MMS200MI_GetItmWhsBasic) calls and based on the values of all these variables, the order quantity is modified and the final order quantity is printed in the cat.info() statement.
+		
+      <h3 class="inputVariablesTitle">Input Variables</h3>
+      <ul><li>iTOMU - TOMU</li><li>iORQT - ORQT</li><li>iUNMS - UNMS</li><li>iALUN - ALUN</li></ul>
+      <h3 class="functionBlock">Code</h3><pre class="codeblock"><code class="codeClass">
+          iORQT = iORQT == null ? "" : iORQT.trim();
+
+		iTOMU = iTOMU == null ? "" : iTOMU.trim();
+
+		iALUN = iALUN == null ? "" : iALUN.trim();
+
+		iUNMS = iUNMS == null ? "" : iUNMS.trim();
+
+
+		iTOMU = iTOMU.isEmpty() ? "0" : iTOMU;
+
+		iORQT = iORQT.isEmpty() ? "0" : iORQT;
+
+		cat.info(strUUID + "[:] " + getClass().getName() +  " iALUN : " + iALUN + "UNMS " + iUNMS);
+
+		
+		if (!iUNMS.equals(iALUN)) {
+			
+			
+			oChangedOrderQty = iORQT;
+
+			return;
+
+		}
+
+		cat.info(strUUID + "[:] " + getClass().getName() + " WHLO : " + WHLO);
+
+
+		if (Double.parseDouble(iORQT) > Double.parseDouble(iTOMU) && Double.parseDouble(iTOMU) != 0.0) {
+			int div = (int) (Double.parseDouble(iORQT) / Double.parseDouble(iTOMU));
+
+			double rem = (Double.parseDouble(iORQT) % Double.parseDouble(iTOMU));
+
+			if (rem != 0) {
+				oChangedOrderQty = String.valueOf(Double.parseDouble(iTOMU) * (div + 1));
+
+			} else {
+				oChangedOrderQty = String.valueOf(Double.parseDouble(iTOMU) * (div));
+
+			}
+
+			cat.info(strUUID + "[:] " + getClass().getName() + " " + ITNO + " iTOMU : " + iTOMU.trim() + " iORQT : "
+					+ iORQT.trim());
+
+			cat.info(strUUID + "[:] " + getClass().getName() + " Quantity more Item Altered " + ITNO
+					+ " ChangedOrderQty : " + oChangedOrderQty.trim());
+      </code></pre>
+      <h3 class="outputVariablesTitle">Output Variables</h3>
+      <ul><li>oChangedOrderQty - ChangedOrderQty</li></ul>
+      <script>
+        document.getElementsByClassName('codeClass')[0].innerText = js_beautify(document.getElementsByClassName('codeClass')[0].innerText, {
+          'indent_size': 1,
+          'indent_char': '	'
+        }).trim()
+        </script>
+  </body>
+</html>

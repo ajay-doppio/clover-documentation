@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<meta content="utf-8"/>
+    <script src="https://res.cloudinary.com/techiedelight/raw/upload/v1541880278/beautify.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <style>body{
+  padding: 25px;
+}
+.title {
+	color: #5C6AC4;
+}
+.functionTitle {
+	color: #c45c5c;
+}
+h2{
+    color:cornflowerblue;
+}
+h3{
+    color:cornflowerblue;
+}
+pre {
+  position: relative;
+  margin: 0 0 1.625em;
+  white-space: pre;
+  word-wrap: normal;
+  }
+    pre:code {
+      overflow-x: scroll;
+      display: block;
+      padding: 0 1em;
+      background: $accent-color;
+      background-image: linear-gradient(darken($accent-color, 3%) 50%, transparent 50%);
+      background-size: 100% 3em;
+      background-position: 0 1.5em;
+      background-origin: content-box;
+      color: $background;
+      line-height: 1.5;
+      font-size: 1em;
+    }</style>
+<title>CheckIfOrderIsAlreadyRolledOver</title>
+  </head>
+  <body>
+      <h1 class="functionTitle">CheckIfOrderIsAlreadyRolledOver</h2>
+      <h2 class="overviewClass">Overview</h2>
+      If the last API (CUSEXTMI_GetFieldValue) call did not fail, this fucntion collects the temporary & final order (TORNO & FORNO) number from the API call. And based on whether the collected varaible are empty or not, an email is sent to the recipient set up in Partner Admin properties and abort() the process.   
+		
+      <h3 class="inputVariablesTitle">Input Variables</h3>
+      <ul><li>iTORNO_New - TORNO_New</li><li>iFORNO_New - FORNO_New</li><li>iORNO_Old - ORNO_Old</li></ul>
+      <h3 class="functionBlock">Code</h3><pre class="codeblock"><code class="codeClass">
+          String agreement = getManifestInfo("cmn:agreement");
+
+		iTORNO_New = iTORNO_New == null ? "" : iTORNO_New.trim();
+
+		iFORNO_New = iFORNO_New == null ? "" : iFORNO_New.trim();
+
+		iORNO_Old = iORNO_Old == null ? "" : iORNO_Old.trim();
+
+		
+		java.util.Properties mailProperties = com.intentia.ecutil.server.MeCProperties.getMeCProperties();
+
+
+
+		String EmailHost = mailProperties.getProperty("ErrorMail.Host");
+
+		String EmailFrom = mailProperties.getProperty("ErrorMail.From");
+
+		String EmailSubject = "CO Rollover Order Aborted | Order Already Rolled Over";
+
+		String EmailTo = getManifestInfo("agr:EmailTo");
+;
+
+		String EmailBody = "The CO Rollover Process for Order Number "+iORNO_Old+" has been aborted as the Order has already been rolled over.";
+
+		
+		if (isLastAPICallOK() && !iTORNO_New.isEmpty() && !iFORNO_New.isEmpty()) {
+				cat.info(strUUID + "[:]" + getClass().getName() + " Order Is Already Rolled Over - FORNO = "
+						+ iFORNO_New);
+
+			setManifestInfo("map:altAgreement",
+					agreement + " (Aborted - Order already Rolled Over - TORNO = " + iFORNO_New + ")");
+
+			
+			EmailBody = EmailBody + "<br><br>OIS275 Order Number : <b>"+iTORNO_New+"</b><br>OIS300 Order Number : <b>"+iFORNO_New;
+
+			
+			com.intentia.ec.utility.errormessage.ServerMailSender.sendMessage(EmailHost, "M3IECMsgOrderIssue@cloversonoma.com", EmailFrom,
+					EmailSubject, "text/html", EmailBody);
+
+			
+			abort();
+
+		} else if (isLastAPICallOK() && !iTORNO_New.isEmpty() && iFORNO_New.isEmpty()) {
+				cat.info(strUUID + "[:]" + getClass().getName() + " Order Is Already Rolled Over - TORNO = "
+						+ iTORNO_New);
+
+			setManifestInfo("map:altAgreement",
+					agreement + " (Aborted - Order already Rolled Over - TORNO = " + iTORNO_New + ")");
+
+			
+			EmailBody = EmailBody + "<br><br>OIS275 Order Number : <b>"+iTORNO_New;
+
+			com.intentia.ec.utility.errormessage.ServerMailSender.sendMessage(EmailHost, "M3IECMsgOrderIssue@cloversonoma.com", EmailFrom,
+					EmailSubject, "text/html", EmailBody);
+
+			abort();
+
+		} else {
+			cat.info(strUUID + "[:]" + getClass().getName() + " test "
+					+ iTORNO_New);
+
+		}
+      </code></pre>
+      
+      
+      <script>
+        document.getElementsByClassName('codeClass')[0].innerText = js_beautify(document.getElementsByClassName('codeClass')[0].innerText, {
+          'indent_size': 1,
+          'indent_char': '	'
+        }).trim()
+        </script>
+  </body>
+</html>

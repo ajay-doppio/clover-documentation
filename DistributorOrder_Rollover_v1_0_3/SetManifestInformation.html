@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+<meta content="utf-8"/>
+    <script src="https://res.cloudinary.com/techiedelight/raw/upload/v1541880278/beautify.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <style>body{
+  padding: 25px;
+}
+.title {
+	color: #5C6AC4;
+}
+.functionTitle {
+	color: #c45c5c;
+}
+h2{
+    color:cornflowerblue;
+}
+h3{
+    color:cornflowerblue;
+}
+pre {
+  position: relative;
+  margin: 0 0 1.625em;
+  white-space: pre;
+  word-wrap: normal;
+  }
+    pre:code {
+      overflow-x: scroll;
+      display: block;
+      padding: 0 1em;
+      background: $accent-color;
+      background-image: linear-gradient(darken($accent-color, 3%) 50%, transparent 50%);
+      background-size: 100% 3em;
+      background-position: 0 1.5em;
+      background-origin: content-box;
+      color: $background;
+      line-height: 1.5;
+      font-size: 1em;
+    }</style>
+<title>SetManifestInformation</title>
+  </head>
+  <body>
+      <h1 class="functionTitle">SetManifestInformation</h2>
+      <h2 class="overviewClass">Overview</h2>
+      Based on the values of the final order details collected in the last API call (OIS100MI_Confirm), corresponding error messages are created and an email is sent to the recipient set up in Partner Admin properties. 
+		
+      <h3 class="inputVariablesTitle">Input Variables</h3>
+      <ul><li>iORNO_Old - ORNO_Old</li><li>iTORNO_New - TORNO_New</li><li>iFORNO_New - FORNO_New</li><li>iSTAT - STAT</li></ul>
+      <h3 class="functionBlock">Code</h3><pre class="codeblock"><code class="codeClass">
+          iFORNO_New = (iFORNO_New == null) ? "" : iFORNO_New.trim();
+
+		iORNO_Old = (iORNO_Old == null) ? "" : iORNO_Old.trim();
+
+		iTORNO_New = (iTORNO_New == null) ? "" : iTORNO_New.trim();
+
+		iSTAT = iSTAT == null ? "" : iSTAT.trim();
+
+
+		java.util.Properties mailProperties = com.intentia.ecutil.server.MeCProperties.getMeCProperties();
+
+
+		String agreement = getManifestInfo("cmn:agreement");
+
+		String EmailHost = mailProperties.getProperty("ErrorMail.Host");
+
+		String EmailFrom = mailProperties.getProperty("ErrorMail.From");
+
+		String EmailSubject = "CO Rollover Order Stuck in OIS275 | OIS275 ORNO:" + iTORNO_New;
+
+		String EmailTo = getManifestInfo("agr:EmailTo");
+
+		String EmailBody = "";
+
+		String errorMessage = "";
+
+		if (iSTAT.equals("15")) {
+			errorMessage = "Confirm failed: Error in header";
+
+			iFORNO_New = "";
+
+		} else if (iSTAT.equals("20")) {
+			errorMessage = "Confirm failed: Header is OK but lines missing";
+
+			iFORNO_New = "";
+
+		} else if (iSTAT.equals("25")) {
+			errorMessage = "Confirm failed: Header is OK but error in order lines";
+
+			iFORNO_New = "";
+
+		} else if (iSTAT.equals("30")) {
+			errorMessage = "Confirm failed: Header and Lines are OK but credit blocked";
+
+			iFORNO_New = "";
+
+		} else if (iSTAT.equals("55")) {
+			errorMessage = "Confirm failed: Abnormal end";
+
+			iFORNO_New = "";
+
+		} else {
+			
+		}
+		EmailBody = "" + "Error Message : " + errorMessage;
+
+		EmailBody += "<br>";
+
+		EmailBody += "Temporary Order : " + iTORNO_New;
+
+		EmailBody += "<br>";
+
+
+		if (iSTAT.equals("90")) {
+
+			setManifestInfo("map:altAgreement", agreement + " (" + "FORNO : " + iFORNO_New + " TORNO : " + iTORNO_New
+					+ " DIST ORNO : " + iORNO_Old + ")");
+
+			cat.info(strUUID + "[:] " + getClass().getName() + " Final Order Created : " + iFORNO_New);
+
+
+		} else {
+			setManifestInfo("map:altAgreement",
+					agreement + " (" + "TORNO : " + iTORNO_New + " DIST ORNO : " + iORNO_Old + ")");
+
+
+
+
+
+			cat.info(strUUID + "[:] " + getClass().getName()
+					+ iTORNO_New + " Final Order Not Created. Email sent to  M3IECMsgOrderIssue@cloversonoma.com");
+
+		}
+		oFORNO_New = iFORNO_New;
+
+		oTORNO_New = iTORNO_New;
+      </code></pre>
+      <h3 class="outputVariablesTitle">Output Variables</h3>
+      <ul><li>oTORNO_New - TORNO_New</li><li>oFORNO_New - FORNO_New</li></ul>
+      <script>
+        document.getElementsByClassName('codeClass')[0].innerText = js_beautify(document.getElementsByClassName('codeClass')[0].innerText, {
+          'indent_size': 1,
+          'indent_char': '	'
+        }).trim()
+        </script>
+  </body>
+</html>
